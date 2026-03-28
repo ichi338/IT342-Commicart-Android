@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">Commicart Andrdoid</string>
+
+    <!-- Profile Strings -->
+    <string name="member_since">Member since: %s</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="change_password">Change Password</string>
+    <string name="change">Change</string>
+    <string name="full_name_required">Full name is required</string>
+    <string name="no_internet">No internet connection</string>
+    <string name="profile_updated">Profile updated!</string>
+    <string name="old_password_required">Old password is required</string>
+    <string name="new_password_required">New password is required</string>
+    <string name="password_min_length">Password must be at least 6 characters</string>
+    <string name="passwords_do_not_match">New passwords do not match</string>
+    <string name="password_changed_success">Password changed successfully!</string>
+    <string name="profile_image_updated">Profile image updated!</string>
+    <string name="error_processing_image">Error processing image:</string>
+</resources>
