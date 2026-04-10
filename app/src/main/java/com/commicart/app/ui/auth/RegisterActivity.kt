@@ -1,39 +1,103 @@
-// ui/auth/RegisterActivity.kt (Updated to receive role from RoleSelection)
 package com.commicart.app.ui.auth
 
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.commicart.app.databinding.ActivityRegisterBinding
-import com.commicart.app.data.models.RegisterRequest
-import com.commicart.app.data.repository.UserRepository
-import com.commicart.app.utils.NetworkUtils
 import com.commicart.app.R
+import com.commicart.app.contracts.RegisterContract
+import com.commicart.app.databinding.ActivityRegisterBinding
+import com.commicart.app.data.repository.UserRepository
+import com.commicart.app.presenters.RegisterPresenter
 
-class RegisterActivity : AppCompatActivity() {
+class RegisterActivity : AppCompatActivity(), RegisterContract.View {
 
     private lateinit var binding: ActivityRegisterBinding
-    private lateinit var userRepository: UserRepository
-    private var selectedRole: String = "CUSTOMER" // Default
+    private lateinit var presenter: RegisterContract.Presenter
+    private var selectedRole: String = "CUSTOMER"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Get selected role from intent
         selectedRole = intent.getStringExtra("SELECTED_ROLE") ?: "CUSTOMER"
 
-        userRepository = UserRepository(this)
+        val userRepository = UserRepository(this)
+        presenter = RegisterPresenter(this, userRepository)
+        presenter.attachView(this)
 
         setupUI()
         setupClickListeners()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        presenter.detachView()
+    }
+
     private fun setupUI() {
-        // Show role badge at the top
-        when (selectedRole) {
+        updateRoleUI(selectedRole)
+    }
+
+    private fun setupClickListeners() {
+        binding.btnRegister.setOnClickListener {
+            val fullName = binding.etFullName.text.toString().trim()
+            val email = binding.etEmail.text.toString().trim()
+            val password = binding.etPassword.text.toString()
+            val confirmPassword = binding.etConfirmPassword.text.toString()
+
+            presenter.validateAndRegister(fullName, email, password, confirmPassword, selectedRole)
+        }
+
+        binding.tvLogin.setOnClickListener {
+            presenter.onLoginClick()
+        }
+    }
+
+    override fun showProgress() {
+        binding.btnRegister.isEnabled = false
+        binding.btnRegister.text = "Registering..."
+        binding.progressBar.visibility = android.view.View.VISIBLE
+    }
+
+    override fun hideProgress() {
+        binding.btnRegister.isEnabled = true
+        binding.btnRegister.text = "Register"
+        binding.progressBar.visibility = android.view.View.GONE
+    }
+
+    override fun showRegistrationSuccess(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+    }
+
+    override fun showError(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+    }
+
+    override fun navigateToLogin() {
+        startActivity(Intent(this, LoginActivity::class.java))
+        finish()
+    }
+
+    override fun setFullNameError(error: String) {
+        binding.etFullName.error = error
+    }
+
+    override fun setEmailError(error: String) {
+        binding.etEmail.error = error
+    }
+
+    override fun setPasswordError(error: String) {
+        binding.etPassword.error = error
+    }
+
+    override fun setConfirmPasswordError(error: String) {
+        binding.etConfirmPassword.error = error
+    }
+
+    override fun updateRoleUI(role: String) {
+        when (role) {
             "ARTIST" -> {
                 binding.tvRoleBadge.text = "Registering as Artist"
                 binding.tvRoleBadge.setBackgroundResource(R.drawable.badge_background_artist)
@@ -45,96 +109,5 @@ class RegisterActivity : AppCompatActivity() {
                 binding.tvRoleHint.text = "Join as a Customer to commission amazing art!"
             }
         }
-    }
-
-    private fun setupClickListeners() {
-        binding.btnRegister.setOnClickListener { performRegistration() }
-        binding.tvLogin.setOnClickListener {
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish()
-        }
-    }
-
-    private fun performRegistration() {
-        val fullName = binding.etFullName.text.toString().trim()
-        val email = binding.etEmail.text.toString().trim()
-        val password = binding.etPassword.text.toString()
-        val confirmPassword = binding.etConfirmPassword.text.toString()
-
-        // Validation
-        if (fullName.isEmpty()) {
-            binding.etFullName.error = "Full name is required"
-            return
-        }
-
-        if (email.isEmpty()) {
-            binding.etEmail.error = "Email is required"
-            return
-        }
-
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            binding.etEmail.error = "Invalid email format"
-            return
-        }
-
-        if (password.isEmpty()) {
-            binding.etPassword.error = "Password is required"
-            return
-        }
-
-        if (password.length < 6) {
-            binding.etPassword.error = "Password must be at least 6 characters"
-            return
-        }
-
-        if (password != confirmPassword) {
-            binding.etConfirmPassword.error = "Passwords do not match"
-            return
-        }
-
-        if (!NetworkUtils.isNetworkAvailable(this)) {
-            Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        binding.btnRegister.isEnabled = false
-        binding.btnRegister.text = "Registering..."
-        binding.progressBar.visibility = android.view.View.VISIBLE
-
-        val request = RegisterRequest(email, password, fullName, selectedRole)
-
-        userRepository.register(request, object : UserRepository.AuthCallback {
-            override fun onSuccess(data: Any?) {
-                runOnUiThread {
-                    binding.btnRegister.isEnabled = true
-                    binding.btnRegister.text = "Register"
-                    binding.progressBar.visibility = android.view.View.GONE
-
-                    val message = if (selectedRole == "ARTIST") {
-                        "Artist account created! Start selling your art."
-                    } else {
-                        "Customer account created! Find amazing artists."
-                    }
-
-                    Toast.makeText(
-                        this@RegisterActivity,
-                        "Registration successful!\n$message",
-                        Toast.LENGTH_LONG
-                    ).show()
-
-                    startActivity(Intent(this@RegisterActivity, LoginActivity::class.java))
-                    finish()
-                }
-            }
-
-            override fun onError(message: String) {
-                runOnUiThread {
-                    binding.btnRegister.isEnabled = true
-                    binding.btnRegister.text = "Register"
-                    binding.progressBar.visibility = android.view.View.GONE
-                    Toast.makeText(this@RegisterActivity, message, Toast.LENGTH_LONG).show()
-                }
-            }
-        })
     }
 }

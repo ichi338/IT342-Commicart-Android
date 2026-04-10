@@ -1,93 +1,104 @@
-// ArtistDashboardActivity.kt with ViewBinding
 package com.commicart.app.ui.artist
 
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.commicart.app.R
+import com.commicart.app.contracts.DashboardContract
 import com.commicart.app.databinding.ActivityArtistDashboardBinding
+import com.commicart.app.data.models.User
 import com.commicart.app.data.repository.UserRepository
+import com.commicart.app.presenters.DashboardPresenter
 import com.commicart.app.ui.auth.LoginActivity
 import com.commicart.app.ui.profile.ProfileActivity
-import com.commicart.app.utils.TokenManager
+import java.text.NumberFormat
+import java.util.Locale
 
-class ArtistDashboardActivity : AppCompatActivity() {
+class ArtistDashboardActivity : AppCompatActivity(), DashboardContract.View {
 
-    // ViewBinding instance
     private lateinit var binding: ActivityArtistDashboardBinding
-    private lateinit var userRepository: UserRepository
-    private lateinit var tokenManager: TokenManager
+    private lateinit var presenter: DashboardContract.Presenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // Initialize ViewBinding
         binding = ActivityArtistDashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        userRepository = UserRepository(this)
-        tokenManager = TokenManager(this)
+        val userRepository = UserRepository(this)
+        presenter = DashboardPresenter(this, userRepository, "ARTIST")
+        presenter.attachView(this, "ARTIST")
 
         setupClickListeners()
-        loadUserProfile()
+        presenter.loadDashboardData()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        presenter.detachView()
     }
 
     private fun setupClickListeners() {
-        // Profile button
         binding.btnViewProfile.setOnClickListener {
-            startActivity(Intent(this, ProfileActivity::class.java))
+            presenter.onViewProfileClick()
         }
 
-        // Manage Portfolio card (Artist-specific)
-        binding.cardManagePortfolio.setOnClickListener {
-            Toast.makeText(this, "Manage Portfolio - Coming Soon", Toast.LENGTH_SHORT).show()
-        }
-
-        // View Commissions card (Artist-specific)
-        binding.cardViewCommissions.setOnClickListener {
-            Toast.makeText(this, "View Commissions - Coming Soon", Toast.LENGTH_SHORT).show()
-        }
-
-        // Analytics card (Artist-specific)
-        binding.cardAnalytics.setOnClickListener {
-            Toast.makeText(this, "Analytics - Coming Soon", Toast.LENGTH_SHORT).show()
-        }
-
-        // Logout button
         binding.btnLogout.setOnClickListener {
-            tokenManager.clearToken()
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish()
-            Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show()
+            presenter.onLogoutClick()
+        }
+
+        binding.cardManagePortfolio.setOnClickListener {
+            presenter.onManagePortfolioClick()
+        }
+
+        binding.cardViewCommissions.setOnClickListener {
+            presenter.onViewCommissionsClick()
+        }
+
+        binding.cardAnalytics.setOnClickListener {
+            presenter.onAnalyticsClick()
         }
     }
 
-    private fun loadUserProfile() {
+    override fun showProgress() {
         binding.progressBar.visibility = android.view.View.VISIBLE
+    }
 
-        userRepository.getProfile(object : UserRepository.ProfileCallback {
-            override fun onSuccess(user: com.commicart.app.data.models.User) {
-                runOnUiThread {
-                    binding.progressBar.visibility = android.view.View.GONE
-                    binding.tvWelcome.text = "Welcome back, Artist ${user.fullName}!"
-                    binding.tvEmail.text = user.email
+    override fun hideProgress() {
+        binding.progressBar.visibility = android.view.View.GONE
+    }
 
-                    // Artist-specific stats
-                    binding.tvEarnings.text = "₱0.00"
-                    binding.tvActiveCommissions.text = "0"
-                    binding.tvTotalSales.text = "0"
-                    binding.tvPortfolioCount.text = "Items: 0"
-                    binding.tvPendingRequests.text = "Pending: 0"
-                    binding.tvThisMonthEarnings.text = "This month: ₱0"
-                }
-            }
+    override fun displayUserInfo(user: User) {
+        binding.tvWelcome.text = "Welcome, ${user.fullName}!"
+        binding.tvEmail.text = "Email: ${user.email}"
+        binding.tvRoleBadge.text = user.role
+    }
 
-            override fun onError(message: String) {
-                runOnUiThread {
-                    binding.progressBar.visibility = android.view.View.GONE
-                    Toast.makeText(this@ArtistDashboardActivity, message, Toast.LENGTH_LONG).show()
-                }
-            }
-        })
+    override fun showError(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+    }
+
+    override fun navigateToProfile() {
+        startActivity(Intent(this, ProfileActivity::class.java))
+    }
+
+    override fun navigateToLogin() {
+        startActivity(Intent(this, LoginActivity::class.java))
+        finish()
+    }
+
+    override fun showArtistSpecificData(portfolioCount: Int, pendingRequests: Int, earnings: Double, totalSales: Int) {
+        val currencyFormat = NumberFormat.getCurrencyInstance(Locale("en", "PH"))
+
+        binding.tvPortfolioCount.text = "Items: $portfolioCount"
+        binding.tvPendingRequests.text = "Pending: $pendingRequests"
+        binding.tvEarnings.text = currencyFormat.format(earnings)
+        binding.tvTotalSales.text = totalSales.toString()
+        binding.tvActiveCommissions.text = pendingRequests.toString()
+        binding.tvThisMonthEarnings.text = "This month: ${currencyFormat.format(earnings)}"
+    }
+
+    override fun showCustomerSpecificData(activeCommissions: Int) {
+        // Not used for artist
     }
 }
