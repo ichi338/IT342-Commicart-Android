@@ -1,3 +1,4 @@
+// core/base/DashboardContract.kt
 package com.commicart.app.core.base
 
 import com.commicart.app.features.profile.data.models.User
@@ -22,7 +23,7 @@ interface DashboardContract {
         fun onLogoutClick()
         fun onManagePortfolioClick()
         fun onViewCommissionsClick()
-        fun onAnalyticsClick()
+        fun onAnalyticsClick()  // Keep for compatibility, but can be empty
         fun onBrowseArtistsClick()
         fun onMyCommissionsClick()
     }

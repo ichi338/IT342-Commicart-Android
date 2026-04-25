@@ -1,3 +1,4 @@
+// core/base/DashboardPresenter.kt
 package com.commicart.app.core.base
 
 import android.content.Context
@@ -32,11 +33,9 @@ class DashboardPresenter(
 
                 when (user.role.uppercase()) {
                     "ARTIST" -> {
-                        // Load artist-specific data
                         loadArtistData()
                     }
                     else -> {
-                        // Load customer-specific data
                         loadCustomerData()
                     }
                 }
@@ -55,7 +54,6 @@ class DashboardPresenter(
 
     private fun loadArtistData() {
         // Simulate loading artist data
-        // In production, fetch from API
         val portfolioCount = 0
         val pendingRequests = 0
         val earnings = 0.0
@@ -65,10 +63,7 @@ class DashboardPresenter(
     }
 
     private fun loadCustomerData() {
-        // Simulate loading customer data
-        // In production, fetch from API
         val activeCommissions = 0
-
         view?.showCustomerSpecificData(activeCommissions)
     }
 
@@ -83,22 +78,33 @@ class DashboardPresenter(
     }
 
     override fun onManagePortfolioClick() {
-        // Navigate to portfolio management
+        if (context is android.app.Activity) {
+            val intent = android.content.Intent(context, com.commicart.app.features.artist.presentation.PortfolioActivity::class.java)
+            context.startActivity(intent)
+        }
     }
 
     override fun onViewCommissionsClick() {
-        // Navigate to commissions view
+        if (context is android.app.Activity) {
+            val intent = android.content.Intent(context, com.commicart.app.features.artist.presentation.CommissionsActivity::class.java)
+            context.startActivity(intent)
+        }
     }
 
     override fun onAnalyticsClick() {
-        // Navigate to analytics
+        // Not needed - removed
     }
 
     override fun onBrowseArtistsClick() {
-        // Navigate to browse artists
+        if (context is android.app.Activity) {
+            val intent = android.content.Intent(context, com.commicart.app.features.customer.presentation.MarketplaceActivity::class.java)
+            context.startActivity(intent)
+        }
     }
 
     override fun onMyCommissionsClick() {
-        // Navigate to my commissions
+        if (context is android.app.Activity) {
+            android.widget.Toast.makeText(context, "My Commissions feature coming soon", android.widget.Toast.LENGTH_SHORT).show()
+        }
     }
 }

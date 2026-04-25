@@ -1,26 +1,25 @@
+// features/auth/presentation/LoginActivity.kt
 package com.commicart.app.features.auth.presentation
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import com.commicart.app.R
+import com.commicart.app.core.base.BaseActivity
+import com.commicart.app.core.utils.*
 import com.commicart.app.features.auth.domain.contracts.LoginContract
-import com.commicart.app.databinding.ActivityLoginBinding
 import com.commicart.app.features.auth.data.models.LoginResponse
 import com.commicart.app.features.auth.data.repository.UserRepository
 import com.commicart.app.features.auth.domain.presenters.LoginPresenter
 import com.commicart.app.features.artist.presentation.ArtistDashboardActivity
 import com.commicart.app.features.customer.presentation.CustomerDashboardActivity
 
-class LoginActivity : AppCompatActivity(), LoginContract.View {
+class LoginActivity : BaseActivity(), LoginContract.View {
 
-    private lateinit var binding: ActivityLoginBinding
     private lateinit var presenter: LoginContract.Presenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityLoginBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setContentView(R.layout.activity_login)
 
         val userRepository = UserRepository(this)
         presenter = LoginPresenter(this, userRepository)
@@ -29,41 +28,36 @@ class LoginActivity : AppCompatActivity(), LoginContract.View {
         setupClickListeners()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        presenter.detachView()
-    }
-
     private fun setupClickListeners() {
-        binding.btnLogin.setOnClickListener {
-            val email = binding.etEmail.text.toString().trim()
-            val password = binding.etPassword.text.toString()
+        onClick(R.id.btnLogin) {
+            val email = getEditTextValue(R.id.etEmail)
+            val password = getEditTextValue(R.id.etPassword)
             presenter.validateAndLogin(email, password)
         }
 
-        binding.tvRegister.setOnClickListener {
+        onClick(R.id.tvLogin) {
             presenter.onRegisterClick()
         }
     }
 
     override fun showProgress() {
-        binding.btnLogin.isEnabled = false
-        binding.btnLogin.text = "Logging in..."
-        binding.progressBar.visibility = android.view.View.VISIBLE
+        disable(R.id.btnLogin)
+        setButtonText(R.id.btnLogin, "Logging in...")
+        showProgress(R.id.progressBar)
     }
 
     override fun hideProgress() {
-        binding.btnLogin.isEnabled = true
-        binding.btnLogin.text = "Login"
-        binding.progressBar.visibility = android.view.View.GONE
+        enable(R.id.btnLogin)
+        setButtonText(R.id.btnLogin, "Login")
+        hideProgress(R.id.progressBar)
     }
 
     override fun showLoginSuccess(loginResponse: LoginResponse) {
-        Toast.makeText(this, "Welcome back, ${loginResponse.fullName}!", Toast.LENGTH_SHORT).show()
+        toast("Welcome back, ${loginResponse.fullName}!")
     }
 
     override fun showError(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        toast(message)
     }
 
     override fun navigateToDashboard(role: String) {
@@ -80,10 +74,10 @@ class LoginActivity : AppCompatActivity(), LoginContract.View {
     }
 
     override fun setEmailError(error: String) {
-        binding.etEmail.error = error
+        setEditTextError(R.id.etEmail, error)
     }
 
     override fun setPasswordError(error: String) {
-        binding.etPassword.error = error
+        setEditTextError(R.id.etPassword, error)
     }
 }

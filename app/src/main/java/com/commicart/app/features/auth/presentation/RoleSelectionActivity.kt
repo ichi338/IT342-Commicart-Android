@@ -1,95 +1,73 @@
+// features/auth/presentation/RoleSelectionActivity.kt
 package com.commicart.app.features.auth.presentation
 
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.commicart.app.databinding.ActivityRoleSelectionBinding
 import com.commicart.app.R
+import com.commicart.app.core.utils.*
 
 class RoleSelectionActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityRoleSelectionBinding
-    private var selectedRole: String = "CUSTOMER" // Default to CUSTOMER
+    private var selectedRole: String = "CUSTOMER"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityRoleSelectionBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setContentView(R.layout.activity_role_selection)
 
         setupRoleSelection()
         setupClickListeners()
+        updateRoleSelection() // Initial update to set default selection
     }
 
     private fun setupRoleSelection() {
-        // Artist card click
-        binding.cardArtist.setOnClickListener {
+        onClick(R.id.cardArtist) {
             selectedRole = "ARTIST"
             updateRoleSelection()
         }
 
-        // Customer card click
-        binding.cardCustomer.setOnClickListener {
+        onClick(R.id.cardCustomer) {
             selectedRole = "CUSTOMER"
             updateRoleSelection()
         }
     }
 
     private fun updateRoleSelection() {
-        // Update Artist card style
         if (selectedRole == "ARTIST") {
-            // Artist selected styling
-            binding.cardArtist.setCardBackgroundColor(
-                androidx.core.content.ContextCompat.getColor(this, R.color.purple_100)
-            )
-            binding.cardArtist.strokeWidth = 2
-            binding.cardArtist.strokeColor = androidx.core.content.ContextCompat.getColor(this, R.color.purple_500)
-            binding.ivArtistCheck.visibility = android.view.View.VISIBLE
-            binding.tvArtistDescription.setTextColor(
-                androidx.core.content.ContextCompat.getColor(this, R.color.purple_500)
-            )
+            // Artist selected - use selected background
+            findViewById<androidx.cardview.widget.CardView>(R.id.cardArtist).apply {
+                setBackgroundResource(R.drawable.card_selected_bg)
+            }
+            show(R.id.ivArtistCheck)
 
-            // Customer unselected styling
-            binding.cardCustomer.setCardBackgroundColor(
-                androidx.core.content.ContextCompat.getColor(this, android.R.color.white)
-            )
-            binding.cardCustomer.strokeWidth = 0
-            binding.ivCustomerCheck.visibility = android.view.View.GONE
-            binding.tvCustomerDescription.setTextColor(
-                androidx.core.content.ContextCompat.getColor(this, R.color.black)
-            )
+            // Customer unselected - use unselected background
+            findViewById<androidx.cardview.widget.CardView>(R.id.cardCustomer).apply {
+                setBackgroundResource(R.drawable.card_unselected_bg)
+            }
+            hide(R.id.ivCustomerCheck)
         } else {
-            // Customer selected styling
-            binding.cardCustomer.setCardBackgroundColor(
-                androidx.core.content.ContextCompat.getColor(this, R.color.purple_100)
-            )
-            binding.cardCustomer.strokeWidth = 2
-            binding.cardCustomer.strokeColor = androidx.core.content.ContextCompat.getColor(this, R.color.purple_500)
-            binding.ivCustomerCheck.visibility = android.view.View.VISIBLE
-            binding.tvCustomerDescription.setTextColor(
-                androidx.core.content.ContextCompat.getColor(this, R.color.purple_500)
-            )
+            // Customer selected - use selected background
+            findViewById<androidx.cardview.widget.CardView>(R.id.cardCustomer).apply {
+                setBackgroundResource(R.drawable.card_selected_bg)
+            }
+            show(R.id.ivCustomerCheck)
 
-            // Artist unselected styling
-            binding.cardArtist.setCardBackgroundColor(
-                androidx.core.content.ContextCompat.getColor(this, android.R.color.white)
-            )
-            binding.cardArtist.strokeWidth = 0
-            binding.ivArtistCheck.visibility = android.view.View.GONE
-            binding.tvArtistDescription.setTextColor(
-                androidx.core.content.ContextCompat.getColor(this, R.color.black)
-            )
+            // Artist unselected - use unselected background
+            findViewById<androidx.cardview.widget.CardView>(R.id.cardArtist).apply {
+                setBackgroundResource(R.drawable.card_unselected_bg)
+            }
+            hide(R.id.ivArtistCheck)
         }
     }
 
     private fun setupClickListeners() {
-        binding.btnCreateAccount.setOnClickListener {
-            // Pass selected role to RegisterActivity
+        onClick(R.id.btnCreateAccount) {
             val intent = Intent(this, RegisterActivity::class.java)
             intent.putExtra("SELECTED_ROLE", selectedRole)
             startActivity(intent)
         }
 
-        binding.tvLogin.setOnClickListener {
+        onClick(R.id.tvLogin) {
             startActivity(Intent(this, LoginActivity::class.java))
         }
     }

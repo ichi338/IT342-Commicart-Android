@@ -1,25 +1,23 @@
+// features/auth/presentation/RegisterActivity.kt
 package com.commicart.app.features.auth.presentation
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import com.commicart.app.R
+import com.commicart.app.core.base.BaseActivity
+import com.commicart.app.core.utils.*
 import com.commicart.app.features.auth.domain.contracts.RegisterContract
-import com.commicart.app.databinding.ActivityRegisterBinding
 import com.commicart.app.features.auth.data.repository.UserRepository
 import com.commicart.app.features.auth.domain.presenters.RegisterPresenter
 
-class RegisterActivity : AppCompatActivity(), RegisterContract.View {
+class RegisterActivity : BaseActivity(), RegisterContract.View {
 
-    private lateinit var binding: ActivityRegisterBinding
     private lateinit var presenter: RegisterContract.Presenter
     private var selectedRole: String = "CUSTOMER"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityRegisterBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setContentView(R.layout.activity_register)
 
         selectedRole = intent.getStringExtra("SELECTED_ROLE") ?: "CUSTOMER"
 
@@ -27,52 +25,43 @@ class RegisterActivity : AppCompatActivity(), RegisterContract.View {
         presenter = RegisterPresenter(this, userRepository)
         presenter.attachView(this)
 
-        setupUI()
+        updateRoleUI(selectedRole)
         setupClickListeners()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        presenter.detachView()
-    }
-
-    private fun setupUI() {
-        updateRoleUI(selectedRole)
-    }
-
     private fun setupClickListeners() {
-        binding.btnRegister.setOnClickListener {
-            val fullName = binding.etFullName.text.toString().trim()
-            val email = binding.etEmail.text.toString().trim()
-            val password = binding.etPassword.text.toString()
-            val confirmPassword = binding.etConfirmPassword.text.toString()
+        onClick(R.id.btnRegister) {
+            val fullName = getEditTextValue(R.id.etFullName)
+            val email = getEditTextValue(R.id.etEmail)
+            val password = getEditTextValue(R.id.etPassword)
+            val confirmPassword = getEditTextValue(R.id.etConfirmPassword)
 
             presenter.validateAndRegister(fullName, email, password, confirmPassword, selectedRole)
         }
 
-        binding.tvLogin.setOnClickListener {
+        onClick(R.id.tvLogin) {
             presenter.onLoginClick()
         }
     }
 
     override fun showProgress() {
-        binding.btnRegister.isEnabled = false
-        binding.btnRegister.text = "Registering..."
-        binding.progressBar.visibility = android.view.View.VISIBLE
+        disable(R.id.btnRegister)
+        setButtonText(R.id.btnRegister, "Registering...")
+        showProgress(R.id.progressBar)
     }
 
     override fun hideProgress() {
-        binding.btnRegister.isEnabled = true
-        binding.btnRegister.text = "Register"
-        binding.progressBar.visibility = android.view.View.GONE
+        enable(R.id.btnRegister)
+        setButtonText(R.id.btnRegister, "Register")
+        hideProgress(R.id.progressBar)
     }
 
     override fun showRegistrationSuccess(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        toast(message)
     }
 
     override fun showError(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        toast(message)
     }
 
     override fun navigateToLogin() {
@@ -81,32 +70,30 @@ class RegisterActivity : AppCompatActivity(), RegisterContract.View {
     }
 
     override fun setFullNameError(error: String) {
-        binding.etFullName.error = error
+        setEditTextError(R.id.etFullName, error)
     }
 
     override fun setEmailError(error: String) {
-        binding.etEmail.error = error
+        setEditTextError(R.id.etEmail, error)
     }
 
     override fun setPasswordError(error: String) {
-        binding.etPassword.error = error
+        setEditTextError(R.id.etPassword, error)
     }
 
     override fun setConfirmPasswordError(error: String) {
-        binding.etConfirmPassword.error = error
+        setEditTextError(R.id.etConfirmPassword, error)
     }
 
     override fun updateRoleUI(role: String) {
         when (role) {
             "ARTIST" -> {
-                binding.tvRoleBadge.text = "Registering as Artist"
-                binding.tvRoleBadge.setBackgroundResource(R.drawable.badge_background_artist)
-                binding.tvRoleHint.text = "Join as an Artist to sell your artwork!"
+                setText(R.id.tvRoleBadge, "Registering as Artist")
+                setText(R.id.tvRoleHint, "Join as an Artist to sell your artwork!")
             }
             else -> {
-                binding.tvRoleBadge.text = "Registering as Customer"
-                binding.tvRoleBadge.setBackgroundResource(R.drawable.badge_background)
-                binding.tvRoleHint.text = "Join as a Customer to commission amazing art!"
+                setText(R.id.tvRoleBadge, "Registering as Customer")
+                setText(R.id.tvRoleHint, "Join as a Customer to commission amazing art!")
             }
         }
     }

@@ -1,12 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
+    <!-- CSS Variables - Design System -->
+    <color name="primary">#46d3fe</color>
+    <color name="accent">#FF98FF</color>
+    <color name="secondary">#0066CC</color>
+    <color name="bg">#F8FCFF</color>
+    <color name="text">#02457A</color>
+    <color name="button_bg">#5EE0FF</color>
+    <color name="button_text">#FFFFFF</color>
+
+    <!-- Additional shades for better UI -->
+    <color name="primary_dark">#4DC8E6</color>
+    <color name="primary_light">#E0F7FF</color>
+    <color name="secondary_dark">#E680E6</color>
+    <color name="secondary_light">#FCE4FF</color>
+    <color name="text_light">#FFFFFF</color>
+    <color name="text_dark">#02457A</color>
+
+    <!-- Status Colors -->
+    <color name="success">#4CAF50</color>
+    <color name="warning">#FF9800</color>
+    <color name="error">#F44336</color>
+
+    <!-- Basic Colors -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <!-- res/values/colors.xml -->
-    <color name="purple_100">#F3E5F5</color>
+    <color name="gray_50">#FAFAFA</color>
+    <color name="gray_100">#F5F5F5</color>
+    <color name="gray_200">#EEEEEE</color>
+    <color name="gray_300">#E0E0E0</color>
+    <color name="gray_400">#BDBDBD</color>
+    <color name="gray_500">#9E9E9E</color>
+    <color name="gray_600">#757575</color>
+    <color name="gray_700">#616161</color>
+    <color name="gray_800">#424242</color>
+    <color name="gray_900">#212121</color>
 </resources>

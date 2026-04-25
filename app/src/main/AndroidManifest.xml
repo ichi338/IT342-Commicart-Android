@@ -57,6 +57,22 @@
 
         </activity>
 
+        <!-- Artist Activities -->
+        <activity
+            android:name=".features.artist.presentation.PortfolioActivity"
+            android:exported="false" />
+        <activity
+            android:name=".features.artist.presentation.CommissionsActivity"
+            android:exported="false" />
+
+        <!-- Customer Activities -->
+        <activity
+            android:name=".features.customer.presentation.MarketplaceActivity"
+            android:exported="false" />
+        <activity
+            android:name=".features.customer.presentation.CommissionRequestActivity"
+            android:exported="false" />
+
 
     </application>
 
